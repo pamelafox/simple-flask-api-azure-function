@@ -2,14 +2,31 @@
 
 This repository includes a very simple Python Flask HTTP API, made for demonstration purposes only.
 
-To try it out:
+## Local development
 
-1. Open this repository in Codespaces
-2. Run the API:
+1. Open this repository in Github Codespaces or VS Code with Remote Devcontainers extension.
+2. Run API v1:
 
 ```console
 python3 api/flask_app.py
 ```
 
-2. Click 'http://127.0.0.1:8080' in the terminal, which should open the website in a new tab
-3. Try the index page, try '/generate_name', and try other paths.
+3. Click 'http://127.0.0.1:5000' in the terminal, which should open the website in a new tab.
+4. Append `/v1/generate_name` to the end of the URL.
+5. Run API v2:
+
+```console
+python3 api/flask_app.py
+```
+
+6. Click 'http://127.0.0.1:8080' in the terminal.
+7. Append `/v2/generate_name?starts_with=n` to the end of the URL.
+
+## Deployment
+
+Run `azd up`.
+
+Navigate to the endpoint displayed in the terminal.
+
+To try API v1, append `/v1/generate_name` to the end of the URL.
+To try API v2, append `/v2/generate_name` to the end of the URL.
