@@ -28,5 +28,3 @@ module resources 'resources.bicep' = {
     tags: tags
   }
 }
-
-output AZURE_LOCATION string = location
