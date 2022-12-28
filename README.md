@@ -16,10 +16,10 @@ python3 api/flask_app.py
 5. Run API v2:
 
 ```console
-python3 api/flask_app.py
+python3 api2/flask_app.py
 ```
 
-6. Click 'http://127.0.0.1:8080' in the terminal.
+6. Click 'http://127.0.0.1:5000' in the terminal.
 7. Append `/v2/generate_name?starts_with=n` to the end of the URL.
 
 ## Deployment
