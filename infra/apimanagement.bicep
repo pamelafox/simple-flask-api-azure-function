@@ -27,6 +27,10 @@ resource apimService 'Microsoft.ApiManagement/service@2021-12-01-preview' = {
   }
 }
 
+resource functionApp 'Microsoft.Web/sites@2022-03-01' existing = {
+  name: functionAppName
+}
+
 resource apimBackend 'Microsoft.ApiManagement/service/backends@2021-12-01-preview' = {
   parent: apimService
   name: functionAppName
@@ -43,6 +47,7 @@ resource apimBackend 'Microsoft.ApiManagement/service/backends@2021-12-01-previe
       }
     }
   }
+  dependsOn: [apimNamedValuesKey]
 }
 
 resource apimNamedValuesKey 'Microsoft.ApiManagement/service/namedValues@2021-12-01-preview' = {
@@ -84,13 +89,14 @@ resource apimAPIGet 'Microsoft.ApiManagement/service/apis/operations@2021-12-01-
   }
 }
 
-resource apimModelPredictPolicy 'Microsoft.ApiManagement/service/apis/operations/policies@2021-12-01-preview' = {
+resource apimAPIGetPolicy 'Microsoft.ApiManagement/service/apis/operations/policies@2021-12-01-preview' = {
   parent: apimAPIGet
   name: 'policy'
   properties: {
     format: 'xml'
     value: '<policies>\r\n<inbound>\r\n<base />\r\n\r\n<set-backend-service id="apim-generated-policy" backend-id="${functionAppName}" />\r\n<cache-lookup vary-by-developer="false" vary-by-developer-groups="false" allow-private-response-caching="false" must-revalidate="false" downstream-caching-type="none" />\r\n<rate-limit calls="20" renewal-period="90" remaining-calls-variable-name="remainingCallsPerSubscription" />\r\n<cors allow-credentials="false">\r\n<allowed-origins>\r\n<origin>*</origin>\r\n</allowed-origins>\r\n<allowed-methods>\r\n<method>GET</method>\r\n<method>POST</method>\r\n</allowed-methods>\r\n</cors>\r\n</inbound>\r\n<backend>\r\n<base />\r\n</backend>\r\n<outbound>\r\n<base />\r\n<cache-store duration="3600" />\r\n</outbound>\r\n<on-error>\r\n<base />\r\n</on-error>\r\n</policies>'
   }
+  dependsOn: [functionApp]
 }
 
 /* Logging*/
