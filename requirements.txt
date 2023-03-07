@@ -1,2 +1,2 @@
 Flask==2.2.3
-azure-functions==1.13.2
+azure-functions==1.13.3
