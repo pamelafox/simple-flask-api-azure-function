@@ -2,10 +2,6 @@ param location string
 param tags object
 param prefix string
 param functionAppName string
-param functionAppUrl string
-param functionAppId string
-@secure()
-param functionAppKey string
 param appInsightsName string
 param appInsightsId string
 param appInsightsKey string
@@ -36,9 +32,9 @@ resource apimBackend 'Microsoft.ApiManagement/service/backends@2021-12-01-previe
   name: functionAppName
   properties: {
     description: functionAppName
-    url: 'https://${functionAppUrl}'
+    url: 'https://${functionApp.properties.hostNames[0]}'
     protocol: 'http'
-    resourceId: '${environment().resourceManager}${functionAppId}'
+    resourceId: '${environment().resourceManager}${functionApp.id}'
     credentials: {
       header: {
         'x-functions-key': [
@@ -55,7 +51,7 @@ resource apimNamedValuesKey 'Microsoft.ApiManagement/service/namedValues@2021-12
   name: 'function-app-key'
   properties: {
     displayName: 'function-app-key'
-    value: functionAppKey
+    value: listKeys('${functionApp.id}/host/default', '2019-08-01').functionKeys.default
     tags: [
       'key'
       'function'
@@ -94,9 +90,9 @@ resource apimAPIGetPolicy 'Microsoft.ApiManagement/service/apis/operations/polic
   name: 'policy'
   properties: {
     format: 'xml'
-    value: '<policies>\r\n<inbound>\r\n<base />\r\n\r\n<set-backend-service id="apim-generated-policy" backend-id="${functionAppName}" />\r\n<cache-lookup vary-by-developer="false" vary-by-developer-groups="false" allow-private-response-caching="false" must-revalidate="false" downstream-caching-type="none" />\r\n<rate-limit calls="20" renewal-period="90" remaining-calls-variable-name="remainingCallsPerSubscription" />\r\n<cors allow-credentials="false">\r\n<allowed-origins>\r\n<origin>*</origin>\r\n</allowed-origins>\r\n<allowed-methods>\r\n<method>GET</method>\r\n<method>POST</method>\r\n</allowed-methods>\r\n</cors>\r\n</inbound>\r\n<backend>\r\n<base />\r\n</backend>\r\n<outbound>\r\n<base />\r\n<cache-store duration="3600" />\r\n</outbound>\r\n<on-error>\r\n<base />\r\n</on-error>\r\n</policies>'
+    value: '<policies>\r\n<inbound>\r\n<base />\r\n\r\n<set-backend-service id="apim-generated-policy" backend-id="${functionApp.properties.name}" />\r\n<cache-lookup vary-by-developer="false" vary-by-developer-groups="false" allow-private-response-caching="false" must-revalidate="false" downstream-caching-type="none" />\r\n<rate-limit calls="20" renewal-period="90" remaining-calls-variable-name="remainingCallsPerSubscription" />\r\n<cors allow-credentials="false">\r\n<allowed-origins>\r\n<origin>*</origin>\r\n</allowed-origins>\r\n<allowed-methods>\r\n<method>GET</method>\r\n<method>POST</method>\r\n</allowed-methods>\r\n</cors>\r\n</inbound>\r\n<backend>\r\n<base />\r\n</backend>\r\n<outbound>\r\n<base />\r\n<cache-store duration="3600" />\r\n</outbound>\r\n<on-error>\r\n<base />\r\n</on-error>\r\n</policies>'
   }
-  dependsOn: [functionApp]
+  dependsOn: [apimBackend]
 }
 
 /* Logging*/

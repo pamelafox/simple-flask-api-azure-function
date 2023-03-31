@@ -24,6 +24,8 @@ python3 api2/flask_app.py
 
 ## Deployment
 
+Run `azd init`.
+
 Run `azd up`.
 
 Navigate to the endpoint displayed in the terminal.
