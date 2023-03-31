@@ -5,9 +5,6 @@ param tags object
 
 var prefix = '${name}-${resourceToken}'
 
-var appServicePlanName = '${prefix}-plan'
-
-
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
   name: '${prefix}-logworkspace'
   location: location
@@ -47,7 +44,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2019-06-01' = {
 }
 
 resource hostingPlan 'Microsoft.Web/serverfarms@2020-10-01' = {
-  name: appServicePlanName
+  name: '${prefix}-plan'
   location: location
   tags: tags
   kind: 'functionapp'
@@ -114,9 +111,6 @@ module apiManagementResources 'apimanagement.bicep' = {
     location: location
     tags: tags
     functionAppName: functionApp.name
-    functionAppUrl: functionApp.properties.hostNames[0]
-    functionAppId: functionApp.id
-    functionAppKey: listKeys('${functionApp.id}/host/default', '2019-08-01').functionKeys.default
     appInsightsName: appInsights.name
     appInsightsId: appInsights.id
     appInsightsKey: appInsights.properties.InstrumentationKey
