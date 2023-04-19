@@ -1,5 +1,5 @@
 {
-	"name": "Azure Developer CLI",
+	"name": "simple-flask-api-azure-function",
 	"build": {
 		"dockerfile": "Dockerfile",
 		"args": { 
@@ -29,6 +29,7 @@
 	},
 	"forwardPorts": [
 		5000,
+		50505,
 		7071
 	],
 	"postCreateCommand": "python3 -m pip install --user -r requirements.txt",
