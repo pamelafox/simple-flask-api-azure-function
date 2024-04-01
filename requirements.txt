@@ -1,2 +1,2 @@
-Flask==2.3.3
+Flask==3.0.2
 azure-functions==1.17.0
