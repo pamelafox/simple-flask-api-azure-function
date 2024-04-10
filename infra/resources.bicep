@@ -103,6 +103,15 @@ resource functionApp 'Microsoft.Web/sites@2020-06-01' = {
   }
 }
 
+module diagnostics 'app-diagnostics.bicep' = {
+  name: 'function-diagnostics'
+  params: {
+    appName: functionApp.name
+    kind: 'functionapp'
+    diagnosticWorkspaceId: logAnalytics.id
+  }
+}
+
 
 module apiManagementResources 'apimanagement.bicep' = {
   name: 'applicationinsights-resources'
