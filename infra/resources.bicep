@@ -2,6 +2,7 @@ param name string
 param location string = resourceGroup().location
 param resourceToken string
 param tags object
+param principalId string
 
 var prefix = '${name}-${resourceToken}'
 
@@ -60,6 +61,11 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2020-10-01' = {
   }
 }
 
+resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: '${prefix}-managed-identity'
+  location: location
+}
+
 resource functionApp 'Microsoft.Web/sites@2020-06-01' = {
   name: '${prefix}-function-app'
   location: location
@@ -67,6 +73,10 @@ resource functionApp 'Microsoft.Web/sites@2020-06-01' = {
     'azd-service-name': 'api'
    })
   kind: 'functionapp,linux'
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: { '${managedIdentity.id}': {} }
+  }
   properties: {
     httpsOnly: true
     serverFarmId: hostingPlan.id
@@ -80,8 +90,16 @@ resource functionApp 'Microsoft.Web/sites@2020-06-01' = {
            value: appInsights.properties.InstrumentationKey
         }
         {
-          name: 'AzureWebJobsStorage'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};EndpointSuffix=${az.environment().suffixes.storage};AccountKey=${listKeys(storageAccount.id, storageAccount.apiVersion).keys[0].value}'
+          name: 'AzureWebJobsStorage__accountName'
+          value: storageAccount.name
+        }
+        {
+          name: 'AzureWebJobsStorage__credential'
+          value: 'managedidentity'
+        }
+        {
+          name: 'AzureWebJobsStorage__clientId'
+          value: managedIdentity.properties.clientId
         }
         {
           name: 'FUNCTIONS_EXTENSION_VERSION'
@@ -90,10 +108,6 @@ resource functionApp 'Microsoft.Web/sites@2020-06-01' = {
         {
           name: 'FUNCTIONS_WORKER_RUNTIME'
           value: 'python'
-        }
-        {
-          name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};EndpointSuffix=${az.environment().suffixes.storage};AccountKey=${listKeys(storageAccount.id, storageAccount.apiVersion).keys[0].value}'
         }
         {
           name: 'ENABLE_ORYX_BUILD'
@@ -105,6 +119,18 @@ resource functionApp 'Microsoft.Web/sites@2020-06-01' = {
         }
       ]
     }
+  }
+}
+
+
+resource role 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(subscription().id, resourceGroup().id,
+             principalId, 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b')
+  properties: {
+    principalId: managedIdentity.properties.principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions',
+                                 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b')
   }
 }
 
