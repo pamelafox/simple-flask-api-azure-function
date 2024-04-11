@@ -41,6 +41,10 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2019-06-01' = {
   sku: {
     name: 'Standard_LRS'
   }
+  properties: {
+    minimumTlsVersion: 'TLS1_2'
+    allowBlobPublicAccess: false
+  }
 }
 
 resource hostingPlan 'Microsoft.Web/serverfarms@2020-10-01' = {
@@ -68,6 +72,7 @@ resource functionApp 'Microsoft.Web/sites@2020-06-01' = {
     serverFarmId: hostingPlan.id
     clientAffinityEnabled: false
     siteConfig: {
+      minTlsVersion: '1.2'
       linuxFxVersion: 'Python|3.9'
       appSettings: [
         {
