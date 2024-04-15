@@ -7,7 +7,7 @@ param appInsightsId string
 param appInsightsKey string
 
 resource apimService 'Microsoft.ApiManagement/service@2021-12-01-preview' = {
-  name: '${prefix}-function-app-apim'
+  name: '${take(prefix, 18)}-function-app-apim'
   location: location
   tags: tags
   sku: {
