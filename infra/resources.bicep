@@ -48,25 +48,23 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2019-06-01' = {
   }
 }
 
-resource hostingPlan 'Microsoft.Web/serverfarms@2020-10-01' = {
+resource hostingPlan 'Microsoft.Web/serverfarms@2023-12-01' = {
   name: '${prefix}-plan'
   location: location
   tags: tags
   kind: 'functionapp'
+  sku: {
+    name: 'FC1'
+    tier: 'FlexConsumption'
+    size: 'FC'
+    family: 'FC'
+  }
   properties: {
     reserved: true
   }
-  sku: {
-    name: 'Y1'
-  }
 }
 
-resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
-  name: '${prefix}-managed-identity'
-  location: location
-}
-
-resource functionApp 'Microsoft.Web/sites@2020-06-01' = {
+resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
   name: '${prefix}-function-app'
   location: location
   tags: union(tags, {
@@ -74,63 +72,77 @@ resource functionApp 'Microsoft.Web/sites@2020-06-01' = {
    })
   kind: 'functionapp,linux'
   identity: {
-    type: 'UserAssigned'
-    userAssignedIdentities: { '${managedIdentity.id}': {} }
+    type: 'SystemAssigned'
   }
   properties: {
-    httpsOnly: true
     serverFarmId: hostingPlan.id
-    clientAffinityEnabled: false
-    siteConfig: {
-      minTlsVersion: '1.2'
-      linuxFxVersion: 'Python|3.9'
-      appSettings: [
-        {
-           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-           value: appInsights.properties.InstrumentationKey
+    functionAppConfig: {
+      deployment: {
+        storage: {
+          type: 'blobContainer'
+          value: '${storageAccount.properties.primaryEndpoints.blob}deploymentpackage'
+          authentication: {
+            type: 'SystemAssignedIdentity'
+          }
         }
-        {
-          name: 'AzureWebJobsStorage__accountName'
-          value: storageAccount.name
-        }
-        {
-          name: 'AzureWebJobsStorage__credential'
-          value: 'managedidentity'
-        }
-        {
-          name: 'AzureWebJobsStorage__clientId'
-          value: managedIdentity.properties.clientId
-        }
-        {
-          name: 'FUNCTIONS_EXTENSION_VERSION'
-          value: '~4'
-        }
-        {
-          name: 'FUNCTIONS_WORKER_RUNTIME'
-          value: 'python'
-        }
-        {
-          name: 'ENABLE_ORYX_BUILD'
-          value: 'true'
-        }
-        {
-          name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
-          value: 'true'
-        }
-      ]
+      }
+      scaleAndConcurrency: {
+        instanceMemoryMB: 2048
+        maximumInstanceCount: 100
+      }
+      runtime: {
+        name: 'python'
+        version: '3.11'
+      }
+    }
+  }
+
+
+  resource configAppSettings 'config' = {
+    name: 'appsettings'
+    properties: {
+        AzureWebJobsStorage__accountName: storageAccount.name
+        APPLICATIONINSIGHTS_CONNECTION_STRING: appInsights.properties.ConnectionString
+        FUNCTIONS_EXTENSION_VERSION: '~4'
     }
   }
 }
 
 
-resource role 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+var storageBlobDataOwnerRoleDefinitionId  = 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b' //Storage Blob Data Owner
+var storageAccountDataContributorRoleDefinitionId  = '17d1049b-9a84-46fb-8f53-869881c3d3ab' //Storage Account Contributor
+var storageQueueDataContributorRoleDefinitionId  = '974c5e8b-45b9-4653-ba55-5f855dd0fb88' //Storage Queue Data Contributor
+
+resource role1 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(subscription().id, resourceGroup().id,
-             principalId, 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b')
+             principalId, storageBlobDataOwnerRoleDefinitionId)
   properties: {
-    principalId: managedIdentity.properties.principalId
+    principalId: functionApp.identity.principalId
     principalType: 'ServicePrincipal'
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions',
-                                 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b')
+      storageBlobDataOwnerRoleDefinitionId)
+  }
+}
+
+resource role2 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(subscription().id, resourceGroup().id,
+             principalId, storageAccountDataContributorRoleDefinitionId)
+  properties: {
+    principalId: functionApp.identity.principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions',
+    storageAccountDataContributorRoleDefinitionId)
+  }
+}
+
+resource role3 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(subscription().id, resourceGroup().id,
+             principalId, storageQueueDataContributorRoleDefinitionId)
+  properties: {
+    principalId: functionApp.identity.principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions',
+    storageQueueDataContributorRoleDefinitionId)
   }
 }
 
