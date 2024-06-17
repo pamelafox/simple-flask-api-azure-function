@@ -22,7 +22,6 @@ module resources 'resources.bicep' = {
   name: 'resources'
   scope: resourceGroup
   params: {
-    name: name
     location: location
     resourceToken: resourceToken
     tags: tags
