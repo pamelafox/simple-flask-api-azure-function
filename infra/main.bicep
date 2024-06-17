@@ -9,8 +9,6 @@ param name string
 @description('Primary location for all resources')
 param location string
 
-param principalId string
-
 var resourceToken = toLower(uniqueString(subscription().id, name, location))
 var tags = { 'azd-env-name': name }
 
@@ -24,10 +22,8 @@ module resources 'resources.bicep' = {
   name: 'resources'
   scope: resourceGroup
   params: {
-    name: name
     location: location
     resourceToken: resourceToken
     tags: tags
-    principalId: principalId
   }
 }
