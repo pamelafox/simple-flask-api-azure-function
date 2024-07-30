@@ -75,7 +75,7 @@ module functionApp 'core/host/functions-flex.bicep' = {
     alwaysOn: false
     appSettings: {
       FUNCTIONS_EXTENSION_VERSION: '~4'
-      AzureWebJobsStorage__accountName: storageAccount.name
+      AzureWebJobsStorage__blobServiceUri: storageAccount.properties.primaryEndpoints.blob
     }
     appServicePlanId: hostingPlan.id
     runtimeName: 'python'
