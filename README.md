@@ -1,6 +1,16 @@
 # Simple Flask API on Azure Functions + APIM
+## 🌏  Open in the Cloud 
+Click any of the buttons below to start a new development environment to demo or contribute to the codebase without having to install anything on your machine:
 
+[![Open in VS Code](https://img.shields.io/badge/Open%20in-VS%20Code-blue?logo=visualstudiocode)](https://vscode.dev/github/pamelafox/simple-flask-api-azure-function)
+[![Open in Glitch](https://img.shields.io/badge/Open%20in-Glitch-blue?logo=glitch)](https://glitch.com/edit/#!/import/github/pamelafox/simple-flask-api-azure-function)
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&repo=pamelafox%2Fsimple-flask-api-azure-function)
+[![Edit in Codesandbox](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/github/pamelafox/simple-flask-api-azure-function)
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/pamelafox/simple-flask-api-azure-function)
+[![Open in Repl.it](https://replit.com/badge/github/withastro/astro)](https://replit.com/github/pamelafox/simple-flask-api-azure-function)
+[![Open in Codeanywhere](https://codeanywhere.com/img/open-in-codeanywhere-btn.svg)](https://app.codeanywhere.com/#https://github.com/pamelafox/simple-flask-api-azure-function)
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/pamelafox/simple-flask-api-azure-function)
+
 
 This repository includes a very simple Python Flask HTTP API, made for demonstration purposes only.
 
